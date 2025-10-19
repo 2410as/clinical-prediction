@@ -77,75 +77,73 @@
 @theme inline {
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
 
-  /* Medical App Color Palette - Clean, Professional, Trustworthy */
-
-  /* Light Mode */
-  --color-background: #ffffff;
-  --color-foreground: #0a0f1a;
+  /* Light Mode - Calm Medical Design */
+  --color-background: #f8fafb;
+  --color-foreground: #2c3e50;
 
   --color-card: #ffffff;
-  --color-card-foreground: #0a0f1a;
+  --color-card-foreground: #2c3e50;
 
-  --color-primary: #0066cc;
+  --color-primary: #4a90e2;
   --color-primary-foreground: #ffffff;
 
-  --color-secondary: #f0f4f8;
-  --color-secondary-foreground: #1e293b;
+  --color-secondary: #e8f4f8;
+  --color-secondary-foreground: #2c5f7f;
 
-  --color-muted: #f8fafc;
-  --color-muted-foreground: #64748b;
+  --color-muted: #f0f7fa;
+  --color-muted-foreground: #7a8a99;
 
-  --color-accent: #e0f2fe;
-  --color-accent-foreground: #0c4a6e;
+  --color-accent: #d4edda;
+  --color-accent-foreground: #2d5f3f;
 
-  --color-destructive: #dc2626;
+  --color-destructive: #e57373;
   --color-destructive-foreground: #ffffff;
 
-  --color-warning: #f59e0b;
+  --color-warning: #ffb74d;
   --color-warning-foreground: #ffffff;
 
-  --color-success: #10b981;
+  --color-success: #66bb6a;
   --color-success-foreground: #ffffff;
 
-  --color-border: #e2e8f0;
-  --color-input: #e2e8f0;
-  --color-ring: #0066cc;
+  --color-border: #e1ecf4;
+  --color-input: #e1ecf4;
+  --color-ring: #4a90e2;
 
-  --radius: 0.5rem;
+  --radius: 1rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-background: #0a0f1a;
-    --color-foreground: #f8fafc;
+    --color-background: #1a2332;
+    --color-foreground: #e8f4f8;
 
-    --color-card: #1e293b;
-    --color-card-foreground: #f8fafc;
+    --color-card: #243447;
+    --color-card-foreground: #e8f4f8;
 
-    --color-primary: #3b82f6;
+    --color-primary: #5fa3e8;
     --color-primary-foreground: #ffffff;
 
-    --color-secondary: #1e293b;
-    --color-secondary-foreground: #f8fafc;
+    --color-secondary: #243447;
+    --color-secondary-foreground: #e8f4f8;
 
-    --color-muted: #1e293b;
-    --color-muted-foreground: #94a3b8;
+    --color-muted: #243447;
+    --color-muted-foreground: #a8b8c8;
 
-    --color-accent: #1e3a5f;
-    --color-accent-foreground: #bae6fd;
+    --color-accent: #2d4a3f;
+    --color-accent-foreground: #d4edda;
 
-    --color-destructive: #ef4444;
+    --color-destructive: #e57373;
     --color-destructive-foreground: #ffffff;
 
-    --color-warning: #fbbf24;
+    --color-warning: #ffb74d;
     --color-warning-foreground: #000000;
 
-    --color-success: #34d399;
+    --color-success: #66bb6a;
     --color-success-foreground: #000000;
 
-    --color-border: #334155;
-    --color-input: #334155;
-    --color-ring: #3b82f6;
+    --color-border: #2d3f52;
+    --color-input: #2d3f52;
+    --color-ring: #5fa3e8;
   }
 }
 @theme inline {
