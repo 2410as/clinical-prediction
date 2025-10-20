@@ -4,11 +4,31 @@ import { Activity, Heart, Droplet, Brain, Bone, Eye, ArrowLeft } from "lucide-re
 
 const TEST_ITEMS = [
   {
+    id: "ast",
+    name: "AST（GOT）",
+    unit: "U/L",
+    normalRange: "10-40",
+    icon: "liver",
+    category: "肝機能検査",
+    description: "肝臓や心臓の健康状態を示す酵素です",
+    detailedDescription:
+      "AST（アスパラギン酸アミノトランスフェラーゼ）は、肝臓、心臓、筋肉などに存在する酵素です。これらの臓器が損傷を受けると血液中に放出されます。特に肝炎、肝硬変、心筋梗塞などで上昇します。ALTと併せて評価することで、肝臓の状態をより正確に把握できます。",
+    factors: [
+      "体位（臥位・立位など）",
+      "時間帯（朝・夕など）",
+      "最近のアルコール摂取",
+      "激しい運動や筋肉損傷",
+      "服用している薬",
+      "心臓疾患の有無",
+    ],
+  },
+  {
     id: "alt",
-    name: "ALT (GPT)",
+    name: "ALT（GPT）",
     unit: "U/L",
     normalRange: "5-40",
     icon: "liver",
+    category: "肝機能検査",
     description: "肝臓の健康状態を示す酵素です",
     detailedDescription:
       "ALT（アラニンアミノトランスフェラーゼ）は、主に肝臓に存在する酵素です。肝細胞が損傷を受けると血液中に放出されるため、肝臓の健康状態を評価する重要な指標となります。肝炎、脂肪肝、アルコール性肝障害などで上昇することがあります。",
@@ -22,11 +42,69 @@ const TEST_ITEMS = [
     ],
   },
   {
+    id: "ggt",
+    name: "γ-GT",
+    unit: "U/L",
+    normalRange: "男性: 10-50, 女性: 10-30",
+    icon: "liver",
+    category: "肝機能検査",
+    description: "肝臓や胆道の状態を示す酵素です",
+    detailedDescription:
+      "γ-GT（ガンマ・グルタミルトランスフェラーゼ）は、肝臓や胆道に多く存在する酵素です。アルコール性肝障害や胆道疾患で特に上昇しやすく、アルコール摂取の影響を受けやすい指標です。慢性的な飲酒習慣がある場合、この値が高くなる傾向があります。",
+    factors: [
+      "アルコール摂取（最も影響大）",
+      "服用している薬（抗てんかん薬など）",
+      "肥満",
+      "胆道系疾患",
+      "脂肪肝",
+      "喫煙",
+    ],
+  },
+  {
+    id: "urine-sugar",
+    name: "尿糖",
+    unit: "",
+    normalRange: "陰性（-）",
+    icon: "kidney",
+    category: "尿検査",
+    description: "尿中の糖の有無を調べます",
+    detailedDescription:
+      "尿糖検査は、尿中にブドウ糖が排泄されているかを調べる検査です。通常、血糖値が腎臓の再吸収能力を超えると（約160-180mg/dL以上）、尿中に糖が出現します。糖尿病のスクリーニングや血糖コントロールの評価に用いられます。",
+    factors: [
+      "血糖値の高さ",
+      "腎臓の糖再吸収能力",
+      "最近の食事内容",
+      "妊娠（妊娠糖尿病）",
+      "ストレスや発熱",
+      "特定の薬剤（ステロイドなど）",
+    ],
+  },
+  {
+    id: "urine-protein",
+    name: "尿蛋白",
+    unit: "",
+    normalRange: "陰性（-）",
+    icon: "kidney",
+    category: "尿検査",
+    description: "尿中のタンパク質の有無を調べます",
+    detailedDescription:
+      "尿蛋白検査は、尿中にタンパク質が排泄されているかを調べる検査です。通常、腎臓は血液中のタンパク質をほとんど通さないため、尿中にはほとんど出現しません。陽性の場合、腎臓の機能低下や腎疾患の可能性があります。",
+    factors: [
+      "体位（立位で一時的に陽性になることも）",
+      "激しい運動後",
+      "発熱や脱水",
+      "尿路感染症",
+      "妊娠",
+      "腎臓疾患の有無",
+    ],
+  },
+  {
     id: "glucose",
     name: "血糖値（Glucose）",
     unit: "mg/dL",
     normalRange: "70-100",
     icon: "blood",
+    category: "血液検査",
     description: "血液中の糖の濃度を測定します",
     detailedDescription:
       "血糖値は血液中のブドウ糖の濃度を示します。食事から摂取した糖質がエネルギー源として利用されるため、体のエネルギー代謝の状態を反映します。高値が続くと糖尿病のリスクが高まります。",
@@ -45,6 +123,7 @@ const TEST_ITEMS = [
     unit: "mg/dL",
     normalRange: "<120",
     icon: "heart",
+    category: "血液検査",
     description: "動脈硬化の原因となる「悪玉コレステロール」です",
     detailedDescription:
       "LDLコレステロールは「悪玉コレステロール」とも呼ばれ、血管壁に蓄積して動脈硬化を引き起こす可能性があります。心筋梗塞や脳卒中などの心血管疾患のリスク因子となるため、適切な管理が重要です。",
@@ -63,6 +142,7 @@ const TEST_ITEMS = [
     unit: "mg/dL",
     normalRange: "0.6-1.2",
     icon: "kidney",
+    category: "血液検査",
     description: "腎臓の働きを示す指標です",
     detailedDescription:
       "クレアチニンは筋肉の代謝産物で、通常は腎臓でろ過されて尿中に排泄されます。腎機能が低下すると血液中のクレアチニン値が上昇するため、腎臓の働きを評価する重要な指標となります。",
@@ -81,6 +161,7 @@ const TEST_ITEMS = [
     unit: "%",
     normalRange: "4.0-5.6",
     icon: "blood",
+    category: "血液検査",
     description: "過去2〜3ヶ月の平均血糖値を示します",
     detailedDescription:
       "HbA1c（ヘモグロビンA1c）は、赤血球中のヘモグロビンに糖が結合した割合を示します。過去2〜3ヶ月間の平均的な血糖値を反映するため、糖尿病の診断や血糖コントロールの評価に用いられます。",
@@ -118,6 +199,17 @@ export default function Home() {
   const [selectedTest, setSelectedTest] = useState<string | null>(null)
 
   const selectedTestData = selectedTest ? TEST_ITEMS.find((test) => test.id === selectedTest) : null
+
+  const groupedTests = TEST_ITEMS.reduce(
+    (acc, test) => {
+      if (!acc[test.category]) {
+        acc[test.category] = []
+      }
+      acc[test.category].push(test)
+      return acc
+    },
+    {} as Record<string, typeof TEST_ITEMS>,
+  )
 
   const handleInputChange = (id: string, value: string) => {
     setInputValues((prev) => ({ ...prev, [id]: value }))
@@ -169,7 +261,9 @@ export default function Home() {
             <h2 className="text-xl font-bold text-gray-900 mb-4">基準値</h2>
             <p className="text-3xl font-bold text-blue-600">
               {selectedTestData.normalRange}
-              <span className="text-lg font-normal ml-2 text-gray-600">{selectedTestData.unit}</span>
+              {selectedTestData.unit && (
+                <span className="text-lg font-normal ml-2 text-gray-600">{selectedTestData.unit}</span>
+              )}
             </p>
           </div>
 
@@ -227,57 +321,73 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="space-y-4 mb-8">
-          {TEST_ITEMS.map((test) => (
-            <div
-              key={test.id}
-              className="bg-white rounded-2xl shadow-md border border-blue-100 overflow-hidden transition-all hover:shadow-lg"
-            >
-              <div className="p-6">
-                <div className="flex items-start gap-4">
-                  {/* Icon - clickable to view details */}
-                  <button
-                    onClick={() => setSelectedTest(test.id)}
-                    className="flex-shrink-0 w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-200 transition-colors"
-                  >
-                    {getIcon(test.icon)}
-                  </button>
+        <div className="space-y-8 mb-8">
+          {Object.entries(groupedTests).map(([category, tests]) => (
+            <div key={category}>
+              {/* Category Header */}
+              <div className="mb-4">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                  <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full"></span>
+                  {category}
+                </h2>
+              </div>
 
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4 mb-3">
-                      <div className="flex-1">
+              {/* Test Cards */}
+              <div className="space-y-4">
+                {tests.map((test) => (
+                  <div
+                    key={test.id}
+                    className="bg-white rounded-2xl shadow-md border border-blue-100 overflow-hidden transition-all hover:shadow-lg"
+                  >
+                    <div className="p-6">
+                      <div className="flex items-start gap-4">
+                        {/* Icon - clickable to view details */}
                         <button
                           onClick={() => setSelectedTest(test.id)}
-                          className="text-left hover:text-blue-600 transition-colors"
+                          className="flex-shrink-0 w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-200 transition-colors"
                         >
-                          <h3 className="text-lg font-bold text-gray-900">{test.name}</h3>
+                          {getIcon(test.icon)}
                         </button>
-                        <p className="text-sm text-gray-600 mt-1">{test.description}</p>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-4 mb-3">
+                            <div className="flex-1">
+                              <button
+                                onClick={() => setSelectedTest(test.id)}
+                                className="text-left hover:text-blue-600 transition-colors"
+                              >
+                                <h3 className="text-lg font-bold text-gray-900">{test.name}</h3>
+                              </button>
+                              <p className="text-sm text-gray-600 mt-1">{test.description}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3 mb-3">
+                            <input
+                              type="number"
+                              step="0.1"
+                              placeholder="数値を入力"
+                              value={inputValues[test.id] || ""}
+                              onChange={(e) => handleInputChange(test.id, e.target.value)}
+                              className="flex-1 px-4 py-3 border-2 border-blue-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-lg font-semibold text-gray-900"
+                            />
+                            {test.unit && <span className="text-gray-600 font-medium min-w-[60px]">{test.unit}</span>}
+                          </div>
+
+                          {/* Normal Range */}
+                          <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
+                            <span className="font-medium">基準値:</span>
+                            <span>
+                              {test.normalRange}
+                              {test.unit && ` ${test.unit}`}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-3 mb-3">
-                      <input
-                        type="number"
-                        step="0.1"
-                        placeholder="数値を入力"
-                        value={inputValues[test.id] || ""}
-                        onChange={(e) => handleInputChange(test.id, e.target.value)}
-                        className="flex-1 px-4 py-3 border-2 border-blue-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-lg font-semibold text-gray-900"
-                      />
-                      <span className="text-gray-600 font-medium min-w-[60px]">{test.unit}</span>
-                    </div>
-
-                    {/* Normal Range */}
-                    <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
-                      <span className="font-medium">基準値:</span>
-                      <span>
-                        {test.normalRange} {test.unit}
-                      </span>
-                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           ))}
