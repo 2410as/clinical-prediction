@@ -1,6 +1,6 @@
 "use client"
-import { useState } from "react"
-import { Activity, Heart, Droplet, Brain, Bone, Eye, ArrowLeft } from "lucide-react"
+import { useState, useRef } from "react"
+import { Activity, Heart, Droplet, Brain, Bone, Eye, ArrowLeft, ChevronRight } from "lucide-react"
 
 const TEST_ITEMS = [
   {
@@ -233,7 +233,7 @@ const TEST_ITEMS = [
     category: "生化学検査",
     description: "心臓や筋肉の機能に重要な電解質です",
     detailedDescription:
-      "カリウムは細胞内に多く存在し、神経伝達、筋肉収縮、心臓のリズム調整に重要な役割を果たします。高カリウム血症は不整脈のリスクがあり、低カリウム血症は筋力低下や不整脈を引き起こす可能性があります。腎機能や薬剤の影響を受けやすい電解質です。",
+      "カリウムは細胞内に多く存在し、神経伝達、筋肉収縮、心臓のリズム調整に重要な役割を果たします。高カリウム血症は不整脈のリスクがあり、低カリウム血症は筋力低下や不整脈を引き起こす可能性があります。腎臓の機能や薬剤の影響を受けやすい電解質です。",
     factors: [
       "腎臓の機能",
       "利尿薬やACE阻害薬の使用",
@@ -597,6 +597,7 @@ const getIcon = (iconType: string) => {
 export default function Home() {
   const [inputValues, setInputValues] = useState<Record<string, string>>({})
   const [selectedTest, setSelectedTest] = useState<string | null>(null)
+  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const selectedTestData = selectedTest ? TEST_ITEMS.find((test) => test.id === selectedTest) : null
 
@@ -611,13 +612,19 @@ export default function Home() {
     {} as Record<string, typeof TEST_ITEMS>,
   )
 
+  const scrollToCategory = (category: string) => {
+    const element = categoryRefs.current[category]
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+  }
+
   const handleInputChange = (id: string, value: string) => {
     setInputValues((prev) => ({ ...prev, [id]: value }))
   }
 
   const handleRunAnalysis = () => {
     console.log("Running analysis with values:", inputValues)
-    // Here you would typically send the data to your backend
   }
 
   if (selectedTestData) {
@@ -721,9 +728,35 @@ export default function Home() {
           </p>
         </div>
 
+        {/* Table of Contents */}
+        <div className="mb-8 bg-white rounded-3xl shadow-lg border border-blue-100 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Activity className="w-5 h-5 text-blue-600" />
+            検査項目一覧
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {Object.keys(groupedTests).map((category) => (
+              <button
+                key={category}
+                onClick={() => scrollToCategory(category)}
+                className="flex items-center justify-between gap-2 px-4 py-3 bg-gradient-to-r from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100 rounded-xl transition-all text-left group border border-blue-100"
+              >
+                <span className="font-medium text-gray-900">{category}</span>
+                <ChevronRight className="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform" />
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="space-y-8 mb-8">
           {Object.entries(groupedTests).map(([category, tests]) => (
-            <div key={category}>
+            <div
+              key={category}
+              ref={(el) => {
+                categoryRefs.current[category] = el
+              }}
+              className="scroll-mt-24"
+            >
               {/* Category Header */}
               <div className="mb-4">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
