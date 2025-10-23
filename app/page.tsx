@@ -423,7 +423,7 @@ const TEST_ITEMS = [
     factors: [
       "採尿方法（中間尿でない場合）",
       "外陰部の清潔度",
-      "尿道炎",
+      "尿路炎",
       "膣炎（女性）",
       "皮膚の剥離",
       "長時間の尿の停滞",
@@ -629,16 +629,16 @@ export default function Home() {
 
   if (selectedTestData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
+      <div className="min-h-screen bg-white">
         {/* Header */}
-        <header className="border-b border-blue-100 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <header className="border-b border-gray-200 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm">
           <div className="container mx-auto px-4 py-4 max-w-4xl">
             <button
               onClick={() => setSelectedTest(null)}
-              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors"
+              className="flex items-center gap-2 text-gray-900 hover:text-gray-600 transition-colors font-medium"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">一覧へ戻る</span>
+              <span>一覧へ戻る</span>
             </button>
           </div>
         </header>
@@ -647,7 +647,7 @@ export default function Home() {
           {/* Title */}
           <div className="mb-8">
             <div className="flex items-center gap-4 mb-4">
-              <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600">
+              <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-900">
                 {getIcon(selectedTestData.icon)}
               </div>
               <div>
@@ -658,15 +658,15 @@ export default function Home() {
           </div>
 
           {/* What is this? */}
-          <div className="bg-white rounded-3xl shadow-lg border border-blue-100 p-8 mb-6">
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6 shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-4">この項目について</h2>
             <p className="text-gray-700 leading-relaxed">{selectedTestData.detailedDescription}</p>
           </div>
 
           {/* Normal Range */}
-          <div className="bg-white rounded-3xl shadow-lg border border-blue-100 p-8 mb-6">
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6 shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-4">基準値</h2>
-            <p className="text-3xl font-bold text-blue-600">
+            <p className="text-3xl font-bold text-gray-900">
               {selectedTestData.normalRange}
               {selectedTestData.unit && (
                 <span className="text-lg font-normal ml-2 text-gray-600">{selectedTestData.unit}</span>
@@ -675,12 +675,12 @@ export default function Home() {
           </div>
 
           {/* Factors that can affect the result */}
-          <div className="bg-white rounded-3xl shadow-lg border border-blue-100 p-8 mb-6">
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6 shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-4">数値に影響を与える要因</h2>
             <ul className="space-y-3">
               {selectedTestData.factors.map((factor, index) => (
                 <li key={index} className="flex items-start gap-3">
-                  <span className="flex-shrink-0 w-2 h-2 rounded-full bg-blue-500 mt-2"></span>
+                  <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
                   <span className="text-gray-700">{factor}</span>
                 </li>
               ))}
@@ -691,7 +691,7 @@ export default function Home() {
           <div className="text-center">
             <button
               onClick={() => setSelectedTest(null)}
-              className="px-8 py-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-2xl font-medium shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-cyan-600 transition-all"
+              className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-medium hover:bg-gray-800 transition-all shadow-sm"
             >
               一覧へ戻る
             </button>
@@ -702,18 +702,16 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="border-b border-blue-100 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+      <header className="border-b border-gray-200 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4 py-4 max-w-4xl">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-400 to-cyan-500 shadow-md">
+            <div className="flex items-center justify-center w-10 h-10 rounded-2xl bg-gray-900">
               <Activity className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-                健康診断結果入力
-              </h1>
+              <h1 className="text-lg font-bold text-gray-900">健康診断結果入力</h1>
               <p className="text-xs text-gray-600">検査結果を入力してください</p>
             </div>
           </div>
@@ -722,16 +720,16 @@ export default function Home() {
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Instructions */}
-        <div className="mb-8 bg-white rounded-3xl shadow-lg border border-blue-100 p-6">
+        <div className="mb-8 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
           <p className="text-gray-700 text-center">
             下記に検査値を入力し、「分析を実行」ボタンをクリックすると、AIによる健康アドバイスが表示されます。
           </p>
         </div>
 
         {/* Table of Contents */}
-        <div className="mb-8 bg-white rounded-3xl shadow-lg border border-blue-100 p-6">
+        <div className="mb-8 bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
           <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Activity className="w-5 h-5 text-blue-600" />
+            <Activity className="w-5 h-5 text-gray-900" />
             検査項目一覧
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -739,10 +737,10 @@ export default function Home() {
               <button
                 key={category}
                 onClick={() => scrollToCategory(category)}
-                className="flex items-center justify-between gap-2 px-4 py-3 bg-gradient-to-r from-blue-50 to-cyan-50 hover:from-blue-100 hover:to-cyan-100 rounded-xl transition-all text-left group border border-blue-100"
+                className="flex items-center justify-between gap-2 px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all text-left group border border-gray-200"
               >
                 <span className="font-medium text-gray-900">{category}</span>
-                <ChevronRight className="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight className="w-4 h-4 text-gray-900 group-hover:translate-x-1 transition-transform" />
               </button>
             ))}
           </div>
@@ -760,7 +758,7 @@ export default function Home() {
               {/* Category Header */}
               <div className="mb-4">
                 <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                  <span className="w-1 h-6 bg-gradient-to-b from-blue-500 to-cyan-500 rounded-full"></span>
+                  <span className="w-1 h-6 bg-gray-900 rounded-full"></span>
                   {category}
                 </h2>
               </div>
@@ -770,14 +768,14 @@ export default function Home() {
                 {tests.map((test) => (
                   <div
                     key={test.id}
-                    className="bg-white rounded-2xl shadow-md border border-blue-100 overflow-hidden transition-all hover:shadow-lg"
+                    className="bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all hover:border-gray-300 shadow-sm"
                   >
                     <div className="p-6">
                       <div className="flex items-start gap-4">
                         {/* Icon - clickable to view details */}
                         <button
                           onClick={() => setSelectedTest(test.id)}
-                          className="flex-shrink-0 w-16 h-16 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 hover:bg-blue-200 transition-colors"
+                          className="flex-shrink-0 w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-900 hover:bg-gray-200 transition-colors"
                         >
                           {getIcon(test.icon)}
                         </button>
@@ -788,7 +786,7 @@ export default function Home() {
                             <div className="flex-1">
                               <button
                                 onClick={() => setSelectedTest(test.id)}
-                                className="text-left hover:text-blue-600 transition-colors"
+                                className="text-left hover:text-gray-600 transition-colors"
                               >
                                 <h3 className="text-lg font-bold text-gray-900">{test.name}</h3>
                               </button>
@@ -803,13 +801,13 @@ export default function Home() {
                               placeholder="数値を入力"
                               value={inputValues[test.id] || ""}
                               onChange={(e) => handleInputChange(test.id, e.target.value)}
-                              className="flex-1 px-4 py-3 border-2 border-blue-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-lg font-semibold text-gray-900"
+                              className="flex-1 px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 transition-all text-lg font-semibold text-gray-900 placeholder-gray-400"
                             />
                             {test.unit && <span className="text-gray-600 font-medium min-w-[60px]">{test.unit}</span>}
                           </div>
 
                           {/* Normal Range */}
-                          <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2">
+                          <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
                             <span className="font-medium">基準値:</span>
                             <span>
                               {test.normalRange}
@@ -829,7 +827,7 @@ export default function Home() {
         <div className="text-center">
           <button
             onClick={handleRunAnalysis}
-            className="px-12 py-5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl hover:from-blue-600 hover:to-cyan-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-12 py-5 bg-gray-900 text-white rounded-2xl font-bold text-lg hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
             disabled={Object.keys(inputValues).length === 0}
           >
             分析を実行
@@ -838,9 +836,9 @@ export default function Home() {
         </div>
 
         {/* Info Notice */}
-        <div className="mt-12 bg-blue-50 border border-blue-200 rounded-2xl p-6">
+        <div className="mt-12 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
           <div className="flex gap-3">
-            <Activity className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <Activity className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" />
             <div className="space-y-2 text-sm">
               <p className="font-medium text-gray-900">情報提供のみを目的としています</p>
               <p className="text-gray-700">
