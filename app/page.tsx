@@ -1,6 +1,6 @@
 "use client"
 import { useState, useRef } from "react"
-import { Activity, Heart, Droplet, Brain, Bone, Eye, ArrowLeft, ChevronRight } from "lucide-react"
+import { Activity, Heart, Droplet, Brain, Bone, Eye, ArrowLeft, ChevronRight, AlertCircle, Info } from "lucide-react"
 
 const TEST_ITEMS = [
   {
@@ -623,9 +623,35 @@ export default function Home() {
     setInputValues((prev) => ({ ...prev, [id]: value }))
   }
 
+  const isOutOfRange = (testId: string, value: string): boolean => {
+    if (!value) return false
+    const test = TEST_ITEMS.find((t) => t.id === testId)
+    if (!test) return false
+
+    const numValue = Number.parseFloat(value)
+    if (isNaN(numValue)) return false
+
+    const range = test.normalRange
+    if (range.includes("<")) {
+      const max = Number.parseFloat(range.replace("<", "").replace("≥", "").trim())
+      return numValue >= max
+    } else if (range.includes("≥")) {
+      const min = Number.parseFloat(range.replace("≥", "").trim())
+      return numValue < min
+    } else if (range.includes("-")) {
+      const [min, max] = range.split("-").map((v) => Number.parseFloat(v.trim()))
+      return numValue < min || numValue > max
+    } else if (range.includes("陰性") || range.includes("少数") || range.includes("弱陽性")) {
+      return false
+    }
+    return false
+  }
+
   const handleRunAnalysis = () => {
     console.log("Running analysis with values:", inputValues)
   }
+
+  const filledCount = Object.keys(inputValues).filter((key) => inputValues[key]).length
 
   if (selectedTestData) {
     return (
@@ -674,6 +700,59 @@ export default function Home() {
             </p>
           </div>
 
+          {/* What if out of range */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6 shadow-sm">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <AlertCircle className="w-5 h-5" />
+              基準値外の場合に考えられること
+            </h2>
+            <p className="text-gray-700 leading-relaxed">
+              {selectedTestData.id === "ast" &&
+                "ASTが基準値より高い場合、肝臓や心臓の細胞が損傷している可能性があります。肝炎、肝硬変、心筋梗塞などが考えられます。ALTと併せて評価することで、より正確な診断が可能です。"}
+              {selectedTestData.id === "alt" &&
+                "ALTが基準値より高い場合、肝臓の細胞が損傷している可能性があります。脂肪肝、アルコール性肝障害、ウイルス性肝炎などが考えられます。生活習慣の改善や医療機関での精密検査が推奨されます。"}
+              {selectedTestData.id === "ggt" &&
+                "γ-GTが基準値より高い場合、アルコール性肝障害や胆道疾患の可能性があります。特にアルコール摂取の影響を受けやすいため、飲酒習慣の見直しが重要です。"}
+              {selectedTestData.id === "creatinine" &&
+                "クレアチニンが基準値より高い場合、腎機能の低下が疑われます。慢性腎臓病、急性腎不全などの可能性があり、早期の医療機関受診が推奨されます。"}
+              {selectedTestData.id === "ldl" &&
+                "LDLコレステロールが基準値より高い場合、動脈硬化のリスクが高まります。食事療法、運動療法、必要に応じて薬物療法が推奨されます。"}
+              {!["ast", "alt", "ggt", "creatinine", "ldl"].includes(selectedTestData.id) &&
+                "基準値外の場合は、医療機関での精密検査や医師への相談が推奨されます。検査値は様々な要因で変動するため、総合的な評価が重要です。"}
+            </p>
+          </div>
+
+          {/* Expert Knowledge */}
+          <div className="bg-gray-50 rounded-2xl border border-gray-200 p-8 mb-6 shadow-sm">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <Info className="w-5 h-5" />
+              知っておきたい専門知識
+            </h2>
+            <div className="space-y-3 text-gray-700">
+              {(selectedTestData.id === "ast" || selectedTestData.id === "alt") && (
+                <p className="leading-relaxed">
+                  <strong>体位による影響：</strong>
+                  特にASTやALTは、採血時の体位（立位から仰臥位への変化）によって血漿量が変動し、数値が影響を受けることが知られています。立位では血漿が濃縮され、仰臥位では希釈されるため、同じ条件で測定することが重要です。
+                </p>
+              )}
+              {selectedTestData.id === "urine-protein" && (
+                <p className="leading-relaxed">
+                  <strong>起立性蛋白尿：</strong>
+                  特に若年層で、立位時に一時的に尿蛋白が陽性になることがあります。これは腎臓の位置関係の変化により、一時的に蛋白が漏れ出る現象で、病的意義は低いことが多いです。
+                </p>
+              )}
+              {selectedTestData.id === "ldl" && (
+                <p className="leading-relaxed">
+                  <strong>体位による影響：</strong>
+                  LDLコレステロールも体位の影響を受けます。立位から仰臥位になると血漿量が増加し、見かけ上の濃度が低下することがあります。
+                </p>
+              )}
+              <p className="leading-relaxed">
+                検査値は単独で評価するのではなく、他の検査項目や臨床症状と併せて総合的に判断することが重要です。
+              </p>
+            </div>
+          </div>
+
           {/* Factors that can affect the result */}
           <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6 shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-4">数値に影響を与える要因</h2>
@@ -684,6 +763,77 @@ export default function Home() {
                   <span className="text-gray-700">{factor}</span>
                 </li>
               ))}
+            </ul>
+          </div>
+
+          {/* Health Tips */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6 shadow-sm">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">健康維持のためのヒント</h2>
+            <ul className="space-y-3">
+              {(selectedTestData.id === "ast" || selectedTestData.id === "alt" || selectedTestData.id === "ggt") && (
+                <>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">アルコールの摂取を控えめにする</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">バランスの取れた食事を心がける</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">適度な運動を習慣化する</span>
+                  </li>
+                </>
+              )}
+              {selectedTestData.id === "ldl" && (
+                <>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">飽和脂肪酸の摂取を控える</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">食物繊維を積極的に摂取する</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">有酸素運動を週3回以上行う</span>
+                  </li>
+                </>
+              )}
+              {(selectedTestData.id === "creatinine" || selectedTestData.id === "bun") && (
+                <>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">十分な水分補給を心がける</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">塩分の摂取を控える</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">血圧管理に注意する</span>
+                  </li>
+                </>
+              )}
+              {!["ast", "alt", "ggt", "ldl", "creatinine", "bun"].includes(selectedTestData.id) && (
+                <>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">規則正しい生活習慣を心がける</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">定期的な健康診断を受ける</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">気になる症状があれば早めに医療機関を受診する</span>
+                  </li>
+                </>
+              )}
             </ul>
           </div>
 
@@ -765,66 +915,98 @@ export default function Home() {
 
               {/* Test Cards */}
               <div className="space-y-4">
-                {tests.map((test) => (
-                  <div
-                    key={test.id}
-                    className="bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all hover:border-gray-300 shadow-sm"
-                  >
-                    <div className="p-6">
-                      <div className="flex items-start gap-4">
-                        {/* Icon - clickable to view details */}
-                        <button
-                          onClick={() => setSelectedTest(test.id)}
-                          className="flex-shrink-0 w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-900 hover:bg-gray-200 transition-colors"
-                        >
-                          {getIcon(test.icon)}
-                        </button>
+                {tests.map((test) => {
+                  const outOfRange = isOutOfRange(test.id, inputValues[test.id] || "")
+                  const hasValue = inputValues[test.id] && inputValues[test.id].trim() !== ""
 
-                        {/* Content */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-4 mb-3">
-                            <div className="flex-1">
-                              <button
-                                onClick={() => setSelectedTest(test.id)}
-                                className="text-left hover:text-gray-600 transition-colors"
-                              >
-                                <h3 className="text-lg font-bold text-gray-900">{test.name}</h3>
-                              </button>
-                              <p className="text-sm text-gray-600 mt-1">{test.description}</p>
+                  return (
+                    <div
+                      key={test.id}
+                      className={`bg-white rounded-2xl border-2 overflow-hidden transition-all shadow-sm ${
+                        outOfRange
+                          ? "border-red-300 bg-red-50/30"
+                          : hasValue
+                            ? "border-green-300 bg-green-50/30"
+                            : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="p-6">
+                        <div className="flex items-start gap-4">
+                          {/* Icon - clickable to view details */}
+                          <button
+                            onClick={() => setSelectedTest(test.id)}
+                            className="flex-shrink-0 w-16 h-16 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-900 hover:bg-gray-200 transition-colors"
+                          >
+                            {getIcon(test.icon)}
+                          </button>
+
+                          {/* Content */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-4 mb-3">
+                              <div className="flex-1">
+                                <button
+                                  onClick={() => setSelectedTest(test.id)}
+                                  className="text-left hover:text-gray-600 transition-colors flex items-center gap-2"
+                                >
+                                  <h3 className="text-lg font-bold text-gray-900">{test.name}</h3>
+                                  <Info className="w-4 h-4 text-gray-400" />
+                                </button>
+                                <p className="text-sm text-gray-600 mt-1">{test.description}</p>
+                              </div>
                             </div>
-                          </div>
 
-                          <div className="flex items-center gap-3 mb-3">
-                            <input
-                              type="number"
-                              step="0.1"
-                              placeholder="数値を入力"
-                              value={inputValues[test.id] || ""}
-                              onChange={(e) => handleInputChange(test.id, e.target.value)}
-                              className="flex-1 px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 transition-all text-lg font-semibold text-gray-900 placeholder-gray-400"
-                            />
-                            {test.unit && <span className="text-gray-600 font-medium min-w-[60px]">{test.unit}</span>}
-                          </div>
+                            <div className="flex items-center gap-3 mb-3">
+                              <input
+                                type="number"
+                                step="0.1"
+                                placeholder="数値を入力"
+                                value={inputValues[test.id] || ""}
+                                onChange={(e) => handleInputChange(test.id, e.target.value)}
+                                className={`flex-1 px-4 py-3 bg-gray-50 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all text-lg font-semibold placeholder-gray-400 ${
+                                  outOfRange
+                                    ? "border-red-400 focus:border-red-500 focus:ring-red-500/10 text-red-900"
+                                    : hasValue
+                                      ? "border-green-400 focus:border-green-500 focus:ring-green-500/10 text-green-900"
+                                      : "border-gray-200 focus:border-gray-900 focus:ring-gray-900/10 text-gray-900"
+                                }`}
+                              />
+                              {test.unit && <span className="text-gray-600 font-medium min-w-[60px]">{test.unit}</span>}
+                            </div>
 
-                          {/* Normal Range */}
-                          <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
-                            <span className="font-medium">基準値:</span>
-                            <span>
-                              {test.normalRange}
-                              {test.unit && ` ${test.unit}`}
-                            </span>
+                            {/* Visual feedback for out of range values */}
+                            {outOfRange && (
+                              <div className="flex items-center gap-2 text-xs text-red-700 bg-red-100 rounded-lg px-3 py-2 border border-red-200 mb-2">
+                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                                <span className="font-medium">この値は基準値の範囲外です</span>
+                              </div>
+                            )}
+
+                            {/* Normal Range */}
+                            <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 border border-gray-200">
+                              <span className="font-medium">基準値:</span>
+                              <span>
+                                {test.normalRange}
+                                {test.unit && ` ${test.unit}`}
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           ))}
         </div>
 
         <div className="text-center">
+          {/* Input progress indicator */}
+          {filledCount > 0 && (
+            <p className="text-sm text-gray-600 mb-3">
+              現在 <span className="font-bold text-gray-900">{filledCount}</span> 項目入力済み
+            </p>
+          )}
           <button
             onClick={handleRunAnalysis}
             className="px-12 py-5 bg-gray-900 text-white rounded-2xl font-bold text-lg hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
