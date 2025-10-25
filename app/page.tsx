@@ -1,6 +1,20 @@
 "use client"
 import { useState, useRef } from "react"
-import { Activity, Heart, Droplet, Brain, Bone, Eye, ArrowLeft, ChevronRight, AlertCircle, Info } from "lucide-react"
+import {
+  Activity,
+  Heart,
+  Droplet,
+  Brain,
+  Bone,
+  Eye,
+  ArrowLeft,
+  ChevronRight,
+  AlertCircle,
+  Info,
+  TrendingUp,
+  Target,
+  Stethoscope,
+} from "lucide-react"
 
 const TEST_ITEMS = [
   {
@@ -597,6 +611,7 @@ const getIcon = (iconType: string) => {
 export default function Home() {
   const [inputValues, setInputValues] = useState<Record<string, string>>({})
   const [selectedTest, setSelectedTest] = useState<string | null>(null)
+  const [showResults, setShowResults] = useState(false)
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const selectedTestData = selectedTest ? TEST_ITEMS.find((test) => test.id === selectedTest) : null
@@ -649,9 +664,399 @@ export default function Home() {
 
   const handleRunAnalysis = () => {
     console.log("Running analysis with values:", inputValues)
+    setShowResults(true)
   }
 
   const filledCount = Object.keys(inputValues).filter((key) => inputValues[key]).length
+
+  const calculateRiskScores = () => {
+    const scores = {
+      liver: 0,
+      kidney: 0,
+      lipid: 0,
+      diabetes: 0,
+      overall: 0,
+    }
+
+    // Liver function risk
+    const ast = Number.parseFloat(inputValues["ast"] || "0")
+    const alt = Number.parseFloat(inputValues["alt"] || "0")
+    const ggt = Number.parseFloat(inputValues["ggt"] || "0")
+
+    if (ast > 40) scores.liver += ((ast - 40) / 40) * 30
+    if (alt > 40) scores.liver += ((alt - 40) / 40) * 30
+    if (ggt > 50) scores.liver += ((ggt - 50) / 50) * 40
+    scores.liver = Math.min(100, scores.liver)
+
+    // Kidney function risk
+    const creatinine = Number.parseFloat(inputValues["creatinine"] || "0")
+    const bun = Number.parseFloat(inputValues["bun"] || "0")
+    const egfr = Number.parseFloat(inputValues["egfr"] || "100")
+
+    if (creatinine > 1.09) scores.kidney += ((creatinine - 1.09) / 1.09) * 40
+    if (bun > 20) scores.kidney += ((bun - 20) / 20) * 30
+    if (egfr < 60) scores.kidney += ((60 - egfr) / 60) * 30
+    scores.kidney = Math.min(100, scores.kidney)
+
+    // Lipid risk
+    const ldl = Number.parseFloat(inputValues["ldl-cholesterol"] || "0")
+    const hdl = Number.parseFloat(inputValues["hdl-cholesterol"] || "100")
+    const tg = Number.parseFloat(inputValues["triglyceride-fasting"] || "0")
+
+    if (ldl > 120) scores.lipid += ((ldl - 120) / 120) * 40
+    if (hdl < 40) scores.lipid += ((40 - hdl) / 40) * 30
+    if (tg > 150) scores.lipid += ((tg - 150) / 150) * 30
+    scores.lipid = Math.min(100, scores.lipid)
+
+    // Diabetes risk
+    const glucose = Number.parseFloat(inputValues["glucose"] || "0")
+    const hba1c = Number.parseFloat(inputValues["hba1c"] || "0")
+
+    if (glucose > 100) scores.diabetes += ((glucose - 100) / 100) * 50
+    if (hba1c > 5.6) scores.diabetes += ((hba1c - 5.6) / 5.6) * 50
+    scores.diabetes = Math.min(100, scores.diabetes)
+
+    // Overall risk
+    scores.overall = (scores.liver + scores.kidney + scores.lipid + scores.diabetes) / 4
+
+    return scores
+  }
+
+  const detectAbnormalPatterns = () => {
+    const patterns = []
+
+    const ast = Number.parseFloat(inputValues["ast"] || "0")
+    const alt = Number.parseFloat(inputValues["alt"] || "0")
+    const ggt = Number.parseFloat(inputValues["ggt"] || "0")
+
+    // Alcoholic liver disease pattern
+    if (ast > 40 && alt > 40 && ggt > 50 && ast / alt > 1) {
+      patterns.push({
+        title: "アルコール性肝障害の可能性",
+        description:
+          "AST、ALT、γ-GTの3つが同時に上昇しており、特にAST/ALT比が1以上の場合、アルコール性肝障害の可能性が高いです。",
+        severity: "high",
+        relatedTests: ["AST（GOT）", "ALT（GPT）", "γ-GT"],
+      })
+    }
+
+    // Non-alcoholic fatty liver pattern
+    if (alt > ast && alt > 40 && ggt < 50) {
+      patterns.push({
+        title: "非アルコール性脂肪肝の可能性",
+        description: "ALTがASTより高く、γ-GTが正常範囲の場合、非アルコール性脂肪肝（NAFLD）の可能性があります。",
+        severity: "medium",
+        relatedTests: ["ALT（GPT）", "AST（GOT）"],
+      })
+    }
+
+    // Metabolic syndrome pattern
+    const ldl = Number.parseFloat(inputValues["ldl-cholesterol"] || "0")
+    const hdl = Number.parseFloat(inputValues["hdl-cholesterol"] || "100")
+    const tg = Number.parseFloat(inputValues["triglyceride-fasting"] || "0")
+    const glucose = Number.parseFloat(inputValues["glucose"] || "0")
+
+    if (ldl > 120 && hdl < 40 && tg > 150 && glucose > 100) {
+      patterns.push({
+        title: "メタボリックシンドロームのリスク",
+        description:
+          "LDLコレステロール高値、HDLコレステロール低値、中性脂肪高値、血糖値高値が同時に見られる場合、メタボリックシンドロームのリスクが高まります。",
+        severity: "high",
+        relatedTests: ["LDL-コレステロール", "HDL-コレステロール", "中性脂肪（空腹時）", "血糖値（Glucose）"],
+      })
+    }
+
+    // Kidney disease pattern
+    const creatinine = Number.parseFloat(inputValues["creatinine"] || "0")
+    const bun = Number.parseFloat(inputValues["bun"] || "0")
+    const egfr = Number.parseFloat(inputValues["egfr"] || "100")
+
+    if (creatinine > 1.09 && bun > 20 && egfr < 60) {
+      patterns.push({
+        title: "腎機能低下の可能性",
+        description:
+          "クレアチニン高値、尿素窒素高値、e-GFR低値が同時に見られる場合、慢性腎臓病（CKD）の可能性があります。",
+        severity: "high",
+        relatedTests: ["クレアチニン", "尿素窒素（BUN）", "e-GFR"],
+      })
+    }
+
+    return patterns
+  }
+
+  const generateHealthActions = () => {
+    const actions = []
+    const scores = calculateRiskScores()
+
+    if (scores.liver > 30) {
+      actions.push({
+        category: "肝機能改善",
+        actions: [
+          "アルコール摂取を週2日以上休肝日を設ける",
+          "野菜を中心としたバランスの良い食事を心がける",
+          "週3回、30分以上の有酸素運動を行う",
+        ],
+      })
+    }
+
+    if (scores.lipid > 30) {
+      actions.push({
+        category: "脂質管理",
+        actions: [
+          "飽和脂肪酸の摂取を控える（揚げ物、肉の脂身など）",
+          "青魚（EPA・DHA）を週2回以上摂取する",
+          "食物繊維を1日20g以上摂取する（野菜、海藻、きのこ類）",
+        ],
+      })
+    }
+
+    if (scores.diabetes > 30) {
+      actions.push({
+        category: "血糖管理",
+        actions: [
+          "炭水化物の摂取量を適正化する（1食あたり茶碗1杯程度）",
+          "食事は野菜から食べ始める（ベジファースト）",
+          "食後30分以内に軽い運動（散歩など）を行う",
+        ],
+      })
+    }
+
+    if (scores.kidney > 30) {
+      actions.push({
+        category: "腎機能保護",
+        actions: [
+          "塩分摂取を1日6g未満に制限する",
+          "十分な水分補給を心がける（1日1.5〜2L）",
+          "血圧管理に注意する（定期的な測定）",
+        ],
+      })
+    }
+
+    return actions
+  }
+
+  const generateConsultationRecommendations = () => {
+    const recommendations = []
+    const patterns = detectAbnormalPatterns()
+
+    if (patterns.some((p) => p.severity === "high")) {
+      recommendations.push({
+        urgency: "high",
+        department: "内科（消化器内科または腎臓内科）",
+        reason: "複数の検査値に異常が見られ、早期の医療機関受診が推奨されます。",
+        timing: "1週間以内",
+      })
+    } else if (patterns.some((p) => p.severity === "medium")) {
+      recommendations.push({
+        urgency: "medium",
+        department: "内科",
+        reason: "一部の検査値に異常が見られます。医師に相談することをお勧めします。",
+        timing: "1ヶ月以内",
+      })
+    }
+
+    // Specific department recommendations
+    const scores = calculateRiskScores()
+
+    if (scores.liver > 50) {
+      recommendations.push({
+        urgency: "high",
+        department: "消化器内科",
+        reason: "肝機能の数値が大きく基準値を超えています。",
+        timing: "早急に",
+      })
+    }
+
+    if (scores.kidney > 50) {
+      recommendations.push({
+        urgency: "high",
+        department: "腎臓内科",
+        reason: "腎機能の数値が大きく基準値を超えています。",
+        timing: "早急に",
+      })
+    }
+
+    return recommendations
+  }
+
+  if (showResults) {
+    const scores = calculateRiskScores()
+    const patterns = detectAbnormalPatterns()
+    const healthActions = generateHealthActions()
+    const consultations = generateConsultationRecommendations()
+
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="border-b border-gray-200 bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+          <div className="container mx-auto px-4 py-4 max-w-4xl">
+            <button
+              onClick={() => setShowResults(false)}
+              className="flex items-center gap-2 text-gray-900 hover:text-gray-600 transition-colors font-medium"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>入力画面に戻る</span>
+            </button>
+          </div>
+        </header>
+
+        <main className="container mx-auto px-4 py-8 max-w-4xl">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">分析結果</h1>
+            <p className="text-gray-600">入力された検査値に基づく総合的な健康評価です</p>
+          </div>
+
+          {/* Overall Risk Score */}
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6 shadow-sm">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <TrendingUp className="w-5 h-5" />
+              総合リスク評価
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-gray-900 mb-1">{Math.round(scores.liver)}</div>
+                <div className="text-sm text-gray-600">肝機能</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-gray-900 mb-1">{Math.round(scores.kidney)}</div>
+                <div className="text-sm text-gray-600">腎機能</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-gray-900 mb-1">{Math.round(scores.lipid)}</div>
+                <div className="text-sm text-gray-600">脂質</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold text-gray-900 mb-1">{Math.round(scores.diabetes)}</div>
+                <div className="text-sm text-gray-600">血糖</div>
+              </div>
+            </div>
+            <div className="text-center p-6 bg-gray-50 rounded-xl border border-gray-200">
+              <div className="text-5xl font-bold text-gray-900 mb-2">{Math.round(scores.overall)}</div>
+              <div className="text-lg text-gray-600">総合リスクスコア</div>
+              <p className="text-sm text-gray-500 mt-2">0-30: 低リスク / 31-60: 中リスク / 61-100: 高リスク</p>
+            </div>
+          </div>
+
+          {/* Abnormal Patterns */}
+          {patterns.length > 0 && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6 shadow-sm">
+              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5" />
+                検出された異常パターン
+              </h2>
+              <div className="space-y-4">
+                {patterns.map((pattern, index) => (
+                  <div
+                    key={index}
+                    className={`p-6 rounded-xl border-2 ${
+                      pattern.severity === "high" ? "bg-red-50 border-red-200" : "bg-yellow-50 border-yellow-200"
+                    }`}
+                  >
+                    <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                      <AlertCircle
+                        className={`w-5 h-5 ${pattern.severity === "high" ? "text-red-600" : "text-yellow-600"}`}
+                      />
+                      {pattern.title}
+                    </h3>
+                    <p className="text-gray-700 mb-3">{pattern.description}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {pattern.relatedTests.map((test, i) => (
+                        <span
+                          key={i}
+                          className="px-3 py-1 bg-white rounded-lg text-sm font-medium text-gray-700 border border-gray-200"
+                        >
+                          {test}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Health Actions */}
+          {healthActions.length > 0 && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6 shadow-sm">
+              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Target className="w-5 h-5" />
+                推奨される健康行動
+              </h2>
+              <div className="space-y-6">
+                {healthActions.map((action, index) => (
+                  <div key={index}>
+                    <h3 className="font-bold text-gray-900 mb-3">{action.category}</h3>
+                    <ul className="space-y-2">
+                      {action.actions.map((item, i) => (
+                        <li key={i} className="flex items-start gap-3">
+                          <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                          <span className="text-gray-700">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Medical Consultation */}
+          {consultations.length > 0 && (
+            <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-6 shadow-sm">
+              <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Stethoscope className="w-5 h-5" />
+                医療機関への受診推奨
+              </h2>
+              <div className="space-y-4">
+                {consultations.map((consultation, index) => (
+                  <div
+                    key={index}
+                    className={`p-6 rounded-xl border-2 ${
+                      consultation.urgency === "high" ? "bg-red-50 border-red-200" : "bg-yellow-50 border-yellow-200"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <h3 className="font-bold text-gray-900">{consultation.department}</h3>
+                      <span
+                        className={`px-3 py-1 rounded-lg text-sm font-medium ${
+                          consultation.urgency === "high" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {consultation.timing}
+                      </span>
+                    </div>
+                    <p className="text-gray-700">{consultation.reason}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Back Button */}
+          <div className="text-center">
+            <button
+              onClick={() => setShowResults(false)}
+              className="px-8 py-4 bg-gray-900 text-white rounded-2xl font-medium hover:bg-gray-800 transition-all shadow-sm"
+            >
+              入力画面に戻る
+            </button>
+          </div>
+
+          {/* Disclaimer */}
+          <div className="mt-12 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex gap-3">
+              <Activity className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" />
+              <div className="space-y-2 text-sm">
+                <p className="font-medium text-gray-900">重要な注意事項</p>
+                <p className="text-gray-700">
+                  この分析結果は一般的な健康情報の提供を目的としており、医学的診断や治療の代替となるものではありません。検査結果の解釈や具体的な治療方針については、必ず医療専門家にご相談ください。
+                </p>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   if (selectedTestData) {
     return (
