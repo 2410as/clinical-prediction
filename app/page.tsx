@@ -14,6 +14,7 @@ import {
   TrendingUp,
   Target,
   Stethoscope,
+  Calculator,
 } from "lucide-react"
 
 const TEST_ITEMS = [
@@ -588,6 +589,99 @@ const TEST_ITEMS = [
       "服用している薬",
     ],
   },
+  {
+    id: "rbc", // Added RBC count
+    name: "赤血球数",
+    unit: "×10⁴/μL",
+    normalRange: "男性: 430-570, 女性: 380-500",
+    icon: "blood",
+    category: "血球検査",
+    description: "血液中の赤血球の数を示します",
+    detailedDescription:
+      "赤血球は体中に酸素を運ぶ役割を担っています。赤血球の数が基準値より少ない場合（貧血）、酸素供給が不十分になる可能性があります。数が多い場合（多血症）は、血液が固まりやすくなるリスクがあります。",
+    factors: [
+      "鉄分、ビタミンB12、葉酸の摂取状況",
+      "腎臓の機能（エリスロポエチン産生）",
+      "慢性的な出血",
+      "脱水状態",
+      "骨髄の造血機能",
+      "喫煙",
+    ],
+  },
+  {
+    id: "hb", // Added Hemoglobin
+    name: "ヘモグロビン",
+    unit: "g/dL",
+    normalRange: "男性: 13.5-17.5, 女性: 12.0-15.5",
+    icon: "blood",
+    category: "血球検査",
+    description: "赤血球に含まれる酸素運搬タンパク質です",
+    detailedDescription:
+      "ヘモグロビンは赤血球の主要成分であり、酸素を全身に運搬する役割を担っています。ヘモグロビン値が低い場合（貧血）は、倦怠感や息切れなどの症状が現れることがあります。高値の場合は、脱水や多血症が考えられます。",
+    factors: ["鉄分の摂取状況", "ビタミンB12や葉酸の摂取", "慢性疾患", "腎臓の機能", "脱水状態", "喫煙"],
+  },
+  {
+    id: "ht", // Added Hematocrit
+    name: "ヘマトクリット",
+    unit: "%",
+    normalRange: "男性: 40-50, 女性: 35-45",
+    icon: "blood",
+    category: "血球検査",
+    description: "血液全体に占める赤血球の容積の割合です",
+    detailedDescription:
+      "ヘマトクリット値は、血液全体のうち赤血球が占める体積の割合を示します。貧血の重症度を評価するのに役立ちます。低値は貧血、高値は脱水や多血症を示唆することがあります。",
+    factors: ["赤血球数と平均赤血球容積", "脱水状態", "鉄欠乏", "出血", "腎臓の病気", "肺疾患"],
+  },
+  {
+    id: "mcv",
+    name: "MCV（平均赤血球容積）",
+    unit: "fL",
+    normalRange: "80-100",
+    icon: "blood",
+    category: "血球検査",
+    description: "赤血球1個あたりの平均的な大きさを示します",
+    detailedDescription:
+      "MCV（Mean Corpuscular Volume）は、赤血球1個あたりの平均的な容積を示す指標です。貧血の種類を分類するのに重要な検査項目で、高値の場合は大球性貧血（ビタミンB12欠乏、葉酸欠乏など）、低値の場合は小球性貧血（鉄欠乏性貧血、地中海貧血など）が疑われます。",
+    factors: [
+      "鉄分の摂取状況",
+      "ビタミンB12や葉酸の摂取",
+      "アルコール摂取習慣",
+      "甲状腺機能",
+      "骨髄の状態",
+      "慢性疾患の有無",
+    ],
+  },
+  {
+    id: "mch",
+    name: "MCH（平均赤血球ヘモグロビン量）",
+    unit: "pg",
+    normalRange: "27-34",
+    icon: "blood",
+    category: "血球検査",
+    description: "赤血球1個あたりに含まれるヘモグロビンの量を示します",
+    detailedDescription:
+      "MCH（Mean Corpuscular Hemoglobin）は、赤血球1個あたりに含まれるヘモグロビンの平均量を示す指標です。MCVと同様に貧血の分類に用いられます。低値の場合は鉄欠乏性貧血や慢性疾患による貧血、高値の場合はビタミンB12欠乏や葉酸欠乏による貧血が疑われます。",
+    factors: [
+      "鉄分の摂取状況",
+      "ビタミンB12や葉酸の摂取",
+      "慢性出血の有無",
+      "骨髄の造血機能",
+      "遺伝性血液疾患",
+      "栄養状態",
+    ],
+  },
+  {
+    id: "mchc",
+    name: "MCHC（平均赤血球ヘモグロビン濃度）",
+    unit: "g/dL",
+    normalRange: "32-36",
+    icon: "blood",
+    category: "血球検査",
+    description: "赤血球の容積に対するヘモグロビンの濃度を示します",
+    detailedDescription:
+      "MCHC（Mean Corpuscular Hemoglobin Concentration）は、赤血球の容積に対するヘモグロビンの濃度を示す指標です。赤血球内のヘモグロビンの充満度を表します。低値の場合は鉄欠乏性貧血が疑われ、高値の場合は遺伝性球状赤血球症などが考えられます。MCVやMCHと併せて評価することで、貧血の原因をより正確に推定できます。",
+    factors: ["鉄分の摂取状況", "慢性出血の有無", "赤血球の形態異常", "遺伝性血液疾患", "脱水状態", "測定機器の精度"],
+  },
 ]
 
 const getIcon = (iconType: string) => {
@@ -612,6 +706,15 @@ export default function Home() {
   const [inputValues, setInputValues] = useState<Record<string, string>>({})
   const [selectedTest, setSelectedTest] = useState<string | null>(null)
   const [showResults, setShowResults] = useState(false)
+  const [calculatedIndices, setCalculatedIndices] = useState<{
+    mcv: number | null
+    mch: number | null
+    mchc: number | null
+  }>({
+    mcv: null,
+    mch: null,
+    mchc: null,
+  })
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const selectedTestData = selectedTest ? TEST_ITEMS.find((test) => test.id === selectedTest) : null
@@ -636,6 +739,37 @@ export default function Home() {
 
   const handleInputChange = (id: string, value: string) => {
     setInputValues((prev) => ({ ...prev, [id]: value }))
+  }
+
+  const calculateIndices = () => {
+    const rbc = Number.parseFloat(inputValues["rbc"] || "0")
+    const hb = Number.parseFloat(inputValues["hb"] || "0")
+    const ht = Number.parseFloat(inputValues["ht"] || "0")
+
+    if (rbc > 0 && hb > 0 && ht > 0) {
+      // MCV = Ht / RBC × 10 (RBC unit: ×10^4/μL)
+      const mcv = (ht / rbc) * 10
+
+      // MCH = Hb / RBC × 10 (RBC unit: ×10^4/μL)
+      const mch = (hb / rbc) * 10
+
+      // MCHC = Hb / Ht × 100
+      const mchc = (hb / ht) * 100
+
+      setCalculatedIndices({
+        mcv: Number.parseFloat(mcv.toFixed(1)),
+        mch: Number.parseFloat(mch.toFixed(1)),
+        mchc: Number.parseFloat(mchc.toFixed(1)),
+      })
+
+      // Also update inputValues for analysis
+      setInputValues((prev) => ({
+        ...prev,
+        mcv: mcv.toFixed(1),
+        mch: mch.toFixed(1),
+        mchc: mchc.toFixed(1),
+      }))
+    }
   }
 
   const isOutOfRange = (testId: string, value: string): boolean => {
@@ -1122,7 +1256,13 @@ export default function Home() {
                 "クレアチニンが基準値より高い場合、腎機能の低下が疑われます。慢性腎臓病、急性腎不全などの可能性があり、早期の医療機関受診が推奨されます。"}
               {selectedTestData.id === "ldl" &&
                 "LDLコレステロールが基準値より高い場合、動脈硬化のリスクが高まります。食事療法、運動療法、必要に応じて薬物療法が推奨されます。"}
-              {!["ast", "alt", "ggt", "creatinine", "ldl"].includes(selectedTestData.id) &&
+              {selectedTestData.id === "mcv" &&
+                "MCVが基準値より低い場合、小球性貧血（鉄欠乏性貧血など）が疑われます。鉄分の摂取不足や吸収不良が原因のことがあります。高い場合は、大球性貧血（ビタミンB12欠乏、葉酸欠乏など）が疑われます。"}
+              {selectedTestData.id === "mch" &&
+                "MCHが基準値より低い場合、鉄欠乏性貧血などが疑われます。赤血球1個あたりのヘモグロビン量が少ない状態です。高い場合は、ビタミンB12や葉酸の欠乏が原因のことがあります。"}
+              {selectedTestData.id === "mchc" &&
+                "MCHCが基準値より低い場合、鉄欠乏性貧血などが疑われます。赤血球内のヘモグロビンの濃度が低い状態です。高い場合は、遺伝性球状赤血球症などが考えられます。"}
+              {!["ast", "alt", "ggt", "creatinine", "ldl", "mcv", "mch", "mchc"].includes(selectedTestData.id) &&
                 "基準値外の場合は、医療機関での精密検査や医師への相談が推奨されます。検査値は様々な要因で変動するため、総合的な評価が重要です。"}
             </p>
           </div>
@@ -1150,6 +1290,12 @@ export default function Home() {
                 <p className="leading-relaxed">
                   <strong>体位による影響：</strong>
                   LDLコレステロールも体位の影響を受けます。立位から仰臥位になると血漿量が増加し、見かけ上の濃度が低下することがあります。
+                </p>
+              )}
+              {(selectedTestData.id === "mcv" || selectedTestData.id === "mch" || selectedTestData.id === "mchc") && (
+                <p className="leading-relaxed">
+                  <strong>貧血の分類：</strong>
+                  MCV、MCH、MCHCは、貧血の種類を特定するための重要な指標です。これらの値と、赤血球数、ヘモグロビン、ヘマトクリットを総合的に評価することで、鉄欠乏性貧血、ビタミンB12欠乏性貧血、再生不良性貧血などの原因を特定しやすくなります。
                 </p>
               )}
               <p className="leading-relaxed">
@@ -1223,7 +1369,25 @@ export default function Home() {
                   </li>
                 </>
               )}
-              {!["ast", "alt", "ggt", "ldl", "creatinine", "bun"].includes(selectedTestData.id) && (
+              {(selectedTestData.id === "mcv" || selectedTestData.id === "mch" || selectedTestData.id === "mchc") && (
+                <>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">鉄分、ビタミンB12、葉酸をバランス良く摂取する</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">アルコール摂取を控える</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
+                    <span className="text-gray-700">貧血の症状（倦怠感、動悸など）に注意する</span>
+                  </li>
+                </>
+              )}
+              {!["ast", "alt", "ggt", "ldl", "creatinine", "bun", "mcv", "mch", "mchc"].includes(
+                selectedTestData.id,
+              ) && (
                 <>
                   <li className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-2 h-2 rounded-full bg-gray-900 mt-2"></span>
@@ -1299,6 +1463,112 @@ export default function Home() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="mb-8 bg-white rounded-2xl border-2 border-gray-900 p-6 shadow-lg">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Calculator className="w-6 h-6" />
+            赤血球指数の計算
+          </h2>
+          <p className="text-sm text-gray-600 mb-6">
+            赤血球数、ヘモグロビン濃度、ヘマトクリット値を入力すると、MCV、MCH、MCHCが自動計算されます。
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            {/* RBC Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                赤血球数 (RBC)
+                <span className="text-gray-600 ml-1">×10⁴/μL</span>
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                placeholder="例: 450"
+                value={inputValues["rbc"] || ""}
+                onChange={(e) => handleInputChange("rbc", e.target.value)}
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 transition-all text-lg font-semibold"
+              />
+            </div>
+
+            {/* Hb Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                ヘモグロビン濃度 (Hb)
+                <span className="text-gray-600 ml-1">g/dL</span>
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                placeholder="例: 14.5"
+                value={inputValues["hb"] || ""}
+                onChange={(e) => handleInputChange("hb", e.target.value)}
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 transition-all text-lg font-semibold"
+              />
+            </div>
+
+            {/* Ht Input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-900 mb-2">
+                ヘマトクリット値 (Ht)
+                <span className="text-gray-600 ml-1">%</span>
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                placeholder="例: 42.0"
+                value={inputValues["ht"] || ""}
+                onChange={(e) => handleInputChange("ht", e.target.value)}
+                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 transition-all text-lg font-semibold"
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={calculateIndices}
+            disabled={!inputValues["rbc"] || !inputValues["hb"] || !inputValues["ht"]}
+            className="w-full px-6 py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm mb-6"
+          >
+            計算する
+          </button>
+
+          {/* Calculation Results */}
+          {(calculatedIndices.mcv !== null || calculatedIndices.mch !== null || calculatedIndices.mchc !== null) && (
+            <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">計算結果</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* MCV Result */}
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="text-sm text-gray-600 mb-1">MCV（平均赤血球容積）</div>
+                  <div className="text-3xl font-bold text-gray-900">
+                    {calculatedIndices.mcv !== null ? calculatedIndices.mcv : "-"}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">fL</div>
+                  <div className="text-xs text-gray-500 mt-2">基準値: 80-100 fL</div>
+                </div>
+
+                {/* MCH Result */}
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="text-sm text-gray-600 mb-1">MCH（平均赤血球Hb量）</div>
+                  <div className="text-3xl font-bold text-gray-900">
+                    {calculatedIndices.mch !== null ? calculatedIndices.mch : "-"}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">pg</div>
+                  <div className="text-xs text-gray-500 mt-2">基準値: 27-34 pg</div>
+                </div>
+
+                {/* MCHC Result */}
+                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                  <div className="text-sm text-gray-600 mb-1">MCHC（平均赤血球Hb濃度）</div>
+                  <div className="text-3xl font-bold text-gray-900">
+                    {calculatedIndices.mchc !== null ? calculatedIndices.mchc : "-"}
+                  </div>
+                  <div className="text-sm text-gray-600 mt-1">g/dL</div>
+                  <div className="text-xs text-gray-500 mt-2">基準値: 32-36 g/dL</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-8 mb-8">
