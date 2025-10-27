@@ -1,10 +1,10 @@
 "use client"
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import {
   Activity,
   Heart,
   Droplet,
-  Brain,
+  Droplets,
   Bone,
   Eye,
   ArrowLeft,
@@ -694,7 +694,7 @@ const getIcon = (iconType: string) => {
     case "blood":
       return <Droplet className={iconClass} />
     case "kidney":
-      return <Brain className={iconClass} />
+      return <Droplets className={iconClass} /> // Changed from Droplet to Droplets
     case "bone":
       return <Bone className={iconClass} />
     default:
@@ -716,6 +716,23 @@ export default function Home() {
     mchc: null,
   })
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
+  useEffect(() => {
+    const savedValues = localStorage.getItem("healthCheckupValues")
+    if (savedValues) {
+      try {
+        setInputValues(JSON.parse(savedValues))
+      } catch (e) {
+        console.error("Failed to load saved values:", e)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    if (Object.keys(inputValues).length > 0) {
+      localStorage.setItem("healthCheckupValues", JSON.stringify(inputValues))
+    }
+  }, [inputValues])
 
   const selectedTestData = selectedTest ? TEST_ITEMS.find((test) => test.id === selectedTest) : null
 
@@ -1237,6 +1254,13 @@ export default function Home() {
                 <span className="text-lg font-normal ml-2 text-gray-600">{selectedTestData.unit}</span>
               )}
             </p>
+            {/* Reference value disclaimer */}
+            <div className="mt-4 bg-gray-50 rounded-xl p-4 border border-gray-200">
+              <p className="text-sm text-gray-700">
+                <strong>注意：</strong>
+                この基準値は一般的な目安です。実際の健診結果に記載されている基準値を優先してください。基準値は検査機関や測定方法によって異なる場合があります。
+              </p>
+            </div>
           </div>
 
           {/* What if out of range */}
@@ -1415,6 +1439,19 @@ export default function Home() {
               一覧へ戻る
             </button>
           </div>
+
+          {/* Information Source Disclaimer */}
+          <div className="mt-8 bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+            <div className="flex gap-3">
+              <Info className="w-5 h-5 text-gray-900 flex-shrink-0 mt-0.5" />
+              <div className="space-y-2 text-sm">
+                <p className="font-medium text-gray-900">情報源について</p>
+                <p className="text-gray-700">
+                  本サイトの情報は、日本人間ドック学会、日本臨床検査医学会、厚生労働省などの公的機関が公開している情報を参考にしています。最新の医学的知見については、医療専門家にご相談ください。
+                </p>
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     )
@@ -1443,6 +1480,8 @@ export default function Home() {
           <p className="text-gray-700 text-center">
             下記に検査値を入力し、「分析を実行」ボタンをクリックすると、AIによる健康アドバイスが表示されます。
           </p>
+          {/* Auto-save notice */}
+          <p className="text-sm text-gray-600 text-center mt-2">入力した値は自動的に保存されます</p>
         </div>
 
         {/* Table of Contents */}
@@ -1637,6 +1676,7 @@ export default function Home() {
                                 placeholder="数値を入力"
                                 value={inputValues[test.id] || ""}
                                 onChange={(e) => handleInputChange(test.id, e.target.value)}
+                                inputMode="decimal"
                                 className={`flex-1 px-4 py-3 bg-gray-50 border-2 rounded-xl focus:outline-none focus:ring-2 transition-all text-lg font-semibold placeholder-gray-400 ${
                                   outOfRange
                                     ? "border-red-400 focus:border-red-500 focus:ring-red-500/10 text-red-900"
@@ -1700,6 +1740,10 @@ export default function Home() {
               <p className="font-medium text-gray-900">情報提供のみを目的としています</p>
               <p className="text-gray-700">
                 このツールは一般的な健康情報を提供します。検査結果の解釈や医療アドバイスについては、必ず医療専門家にご相談ください。
+              </p>
+              {/* Information source reference */}
+              <p className="text-gray-600 text-xs mt-2">
+                参考：日本人間ドック学会、日本臨床検査医学会、厚生労働省の公開情報に基づいています
               </p>
             </div>
           </div>
