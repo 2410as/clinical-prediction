@@ -1318,7 +1318,7 @@ export default function Home() {
               )}
               {(selectedTestData.id === "mcv" || selectedTestData.id === "mch" || selectedTestData.id === "mchc") && (
                 <p className="leading-relaxed">
-                  <strong>貧血の分類：</strong>
+                  <strong>貧血分類：</strong>
                   MCV、MCH、MCHCは、貧血の種類を特定するための重要な指標です。これらの値と、赤血球数、ヘモグロビン、ヘマトクリットを総合的に評価することで、鉄欠乏性貧血、ビタミンB12欠乏性貧血、再生不良性貧血などの原因を特定しやすくなります。
                 </p>
               )}
