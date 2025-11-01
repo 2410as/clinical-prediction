@@ -1,0 +1,19 @@
+
+services:
+  api:
+    build:
+      context: .
+      target: go-runtime # Dockerfile の "AS go-runtime" ステージを使ってね
+    ports:
+      - "8080:8080"
+    container_name: go-api-service
+
+  web:
+    build:
+      context: .
+      target: web-runtime # Dockerfile の "AS web-runtime" ステージを使ってね
+    ports:
+      - "3000:3000"
+    container_name: nextjs-web-service
+    environment:
+      - NEXT_PUBLIC_API_URL=http://api:8080

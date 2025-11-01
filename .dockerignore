@@ -1,0 +1,17 @@
+# Git関連
+.git
+.gitignore
+
+# Goのビルド成果物（もしあれば）
+main
+*.exe
+
+# フロントエンド関連 (最重要！)
+node_modules
+.next
+build
+dist
+
+# OS固有のファイル
+.DS_Store
+Thumbs.db

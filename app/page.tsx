@@ -717,6 +717,9 @@ export default function Home() {
   })
   const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
+const [isAnalyzing, setIsAnalyzing] = useState(false);
+const [apiResults, setApiResults] = useState<any[] | null>(null); // Go APIからの結果を保存
+
   useEffect(() => {
     const savedValues = localStorage.getItem("healthCheckupValues")
     if (savedValues) {
@@ -813,10 +816,52 @@ export default function Home() {
     return false
   }
 
-  const handleRunAnalysis = () => {
-    console.log("Running analysis with values:", inputValues)
-    setShowResults(true)
-  }
+ const handleRunAnalysis = async () => {
+    setIsAnalyzing(true);     // ローディング開始
+    setApiResults(null);      // 古い結果をクリア
+    setShowResults(true);     // 先に結果ページに移動
+    console.log("Running analysis with values:", inputValues);
+
+    // docker-compose.yml で設定した環境変数をここで使います！
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+    // Go APIに送信するデータを作成
+    const testsToSubmit = Object.keys(inputValues)
+      .map(key => {
+        const test = TEST_ITEMS.find(t => t.id === key);
+        // Goの struct (TestItem) に合わせた形にする
+        return test ? { 
+            id: test.id, 
+            name: test.name, 
+            value: inputValues[key], // 値を文字列のまま送る (Go側で interface{} で受けるため)
+            unit: test.unit 
+        } : null;
+      })
+      .filter(Boolean); // null を除去
+
+    try {
+      const response = await fetch(`${apiUrl}/api/predict`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tests: testsToSubmit }), // Goの PredictRequest struct に合わせる
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json(); // Goの PredictResponse が返ってくる
+      setApiResults(data.results); // APIからの結果を state に保存
+      
+    } catch (error) {
+      console.error("Failed to fetch analysis:", error);
+      // ここでユーザーにエラー通知を出すと親切
+    } finally {
+      setIsAnalyzing(false); // ローディング終了
+    }
+  };
 
   const filledCount = Object.keys(inputValues).filter((key) => inputValues[key]).length
 
