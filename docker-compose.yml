@@ -1,12 +1,20 @@
-
 services:
   api:
     build:
       context: .
-      target: go-runtime # Dockerfile の "AS go-runtime" ステージを使ってね
+      target: go-runtime # Dockerfile の "AS go-runtime" ステージ
     ports:
       - "8080:8080"
     container_name: go-api-service
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=myuser
+      - DB_PASSWORD=mypassword
+      - DB_NAME=mydatabase
+      - DB_SSLMODE=disable
+    depends_on:
+      - db
 
   web:
     build:
@@ -17,3 +25,22 @@ services:
     container_name: nextjs-web-service
     environment:
       - NEXT_PUBLIC_API_URL=http://api:8080
+
+  # ▼ "db:" を "web:" や "api:" と同じインデントに戻します
+  db:
+    image: postgres:16-alpine  # PostgreSQL 16 の軽量版イメージ
+    container_name: postgres-db-service
+    restart: always
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=mydatabase
+    ports:
+      - "5432:5432" # ホストPCからDBに接続するために開けておく
+    volumes:
+      # ▼ 最後の "エラーでる" を削除
+      - postgres_data:/var/lib/postgresql/data
+
+# ▼ "volumes:" を "services:" と同じインデント（階層）で追加します
+volumes:
+  postgres_data:
