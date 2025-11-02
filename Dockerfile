@@ -30,9 +30,7 @@ COPY --from=go-builder /app/main .
 EXPOSE 8080
 CMD ["./main"]
 
-# ------------------------------------------------
 # ステージ4: 最終 (Next.js実行用) イメージ
-# ------------------------------------------------
 # ※ "web" サービスはこのステージを使う
 FROM node:18-alpine AS web-runtime
 WORKDIR /app

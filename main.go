@@ -79,7 +79,7 @@ func main() {
 
 // --- DB関連の関数 ---
 
-// initDB はデータベース接続を初期化します
+// initDB はデータベース接続を初期化
 func initDB() error {
 	// 接続文字列を作成
 	host := os.Getenv("DB_HOST")
@@ -146,7 +146,6 @@ func createTables() error {
 	return nil
 }
 
-// --- APIハンドラ関数 ---
 
 // Handles POST requests to /api/predict (データ保存)
 func predictHandler(w http.ResponseWriter, r *http.Request) {
@@ -180,7 +179,7 @@ func predictHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Println("Successfully saved test results to DB.")
 
-	// モックデータを返す
+	// モックデータ
 	mockResults := []PredictionResult{
 		{
 			ID:         "ldl",
