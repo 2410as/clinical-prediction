@@ -15,7 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 
-// アイコンの定義（Brainを削除しました）
+
 const getIcon = (iconName: string) => {
   const icons: { [key: string]: any } = {
     liver: Activity,

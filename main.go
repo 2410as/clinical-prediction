@@ -7,15 +7,18 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	_ "github.com/lib/pq" // PostgreSQLドライバ
 )
 
-// --- グローバル変数 ---
-var db *sql.DB
+// --- 構造体定義 ---
 
-// --- 構造体定義 (JSONとGoの型) ---
+// Server : データベース接続を保持するための構造体（グローバル変数を回避）
+type Server struct {
+	db *sql.DB
+}
 
 type TestItem struct {
 	ID    string      `json:"id"`
@@ -42,6 +45,7 @@ type PredictResponse struct {
 // DBから読み出すための構造体
 type StoredTestResult struct {
 	ID        int       `json:"id"`
+	BatchID   string    `json:"batch_id"` // 1回の検査をまとめるID
 	TestID    string    `json:"test_id"`
 	TestName  string    `json:"test_name"`
 	TestValue string    `json:"test_value"`
@@ -49,25 +53,26 @@ type StoredTestResult struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// --- メイン関数 (プログラムの開始点) ---
-
 func main() {
-	// 1. DBに接続
-	err := initDB()
+	// 1. DB接続処理
+	db, err := initDB()
 	if err != nil {
 		log.Fatalf("Error initializing database: %v", err)
 	}
+	defer db.Close() // main終了時に閉じる
 	log.Println("Database connection successful!")
 
-	// 2. HTTPハンドラ（APIの窓口）を登録
-	
-	// /api/predict へのPOSTリクエストを処理
-	predictHandler := http.HandlerFunc(predictHandler)
-	http.Handle("/api/predict", corsMiddleware(predictHandler))
+	// Server構造体を初期化（ここでDBを渡す）
+	server := &Server{db: db}
 
-	// /api/results へのGETリクエストを処理
-	resultsHandler := http.HandlerFunc(getResultsHandler)
-	http.Handle("/api/results", corsMiddleware(resultsHandler))
+	// 2. HTTPハンドラを登録（Serverのメソッドとして呼び出す）
+	
+	// /api/predict へのPOSTリクエスト
+	// http.HandlerFuncを使って、メソッドをハンドラに変換
+	http.Handle("/api/predict", corsMiddleware(http.HandlerFunc(server.predictHandler)))
+
+	// /api/results へのGETリクエスト
+	http.Handle("/api/results", corsMiddleware(http.HandlerFunc(server.getResultsHandler)))
 
 	// 3. Webサーバーを起動
 	port := "8080"
@@ -77,11 +82,8 @@ func main() {
 	}
 }
 
-// --- DB関連の関数 ---
-
-// initDB はデータベース接続を初期化
-func initDB() error {
-	// 接続文字列を作成
+// initDB はデータベース接続を初期化し、接続を返します
+func initDB() (*sql.DB, error) {
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")
@@ -92,63 +94,61 @@ func initDB() error {
 	psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		user, password, host, port, dbname, sslmode)
 
-	// データベース接続オブジェクトを準備
-	var err error
-	db, err = sql.Open("postgres", psqlInfo)
+	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// リトライロジック
 	maxRetries := 5
 	for i := 0; i < maxRetries; i++ {
-		err = db.Ping() // 接続をテスト
+		err = db.Ping()
 		if err == nil {
-			break // 接続成功！
+			break
 		}
-		log.Printf("DB connection failed (attempt %d/%d), retrying in 2 seconds... Error: %v", i+1, maxRetries, err)
-		time.Sleep(2 * time.Second) // 2秒待機
+		log.Printf("DB connection failed (attempt %d/%d), retrying... Error: %v", i+1, maxRetries, err)
+		time.Sleep(2 * time.Second)
 	}
 
 	if err != nil {
-		log.Println("Could not connect to the database after all retries.")
-		return err
+		return nil, err
 	}
 
-	// 接続に成功したので、テーブル作成に進む
-	err = createTables()
+	// テーブル作成
+	err = createTables(db)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return db, nil
 }
 
-// createTables は、必要なテーブルがなければ作成します
-func createTables() error {
+// createTables テーブル作成（引数でdbを受け取る）
+func createTables(db *sql.DB) error {
+	// batch_id を追加して、一度の検査リクエストをグループ化できるようにしました
 	createTableSQL := `
-	CREATE TABLE IF NOT EXISTS test_results (
-		id SERIAL PRIMARY KEY,
-		test_id VARCHAR(50),
-		test_name VARCHAR(100),
-		test_value TEXT,
-		test_unit VARCHAR(50),
-		created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
-	);`
+    CREATE TABLE IF NOT EXISTS test_results (
+        id SERIAL PRIMARY KEY,
+        batch_id VARCHAR(50), 
+        test_id VARCHAR(50),
+        test_name VARCHAR(100),
+        test_value TEXT,
+        test_unit VARCHAR(50),
+        created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    );`
 
 	_, err := db.Exec(createTableSQL)
 	if err != nil {
-		log.Printf("Error creating 'test_results' table: %v", err)
+		log.Printf("Error creating table: %v", err)
 		return err
 	}
-
-	log.Println("Table 'test_results' is ready.")
 	return nil
 }
 
+// --- ハンドラメソッド (Server構造体に紐付け) ---
 
-// Handles POST requests to /api/predict (データ保存)
-func predictHandler(w http.ResponseWriter, r *http.Request) {
+// POST: データを保存し、判定結果を返す
+func (s *Server) predictHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -161,59 +161,80 @@ func predictHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("Received data: %+v\n", requestData)
+	// 今回のリクエスト用の一意なID（BatchID）を生成
+	// 簡易的に現在時刻を使用（本格的にはUUIDなどが良い）
+	batchID := fmt.Sprintf("batch_%d", time.Now().UnixNano())
 
-	// DB保存処理
 	insertSQL := `
-	INSERT INTO test_results (test_id, test_name, test_value, test_unit)
-	VALUES ($1, $2, $3, $4)`
+    INSERT INTO test_results (batch_id, test_id, test_name, test_value, test_unit)
+    VALUES ($1, $2, $3, $4, $5)`
+
+	var results []PredictionResult
 
 	for _, item := range requestData.Tests {
+		// DB保存
 		valueStr := fmt.Sprintf("%v", item.Value)
-		_, err := db.Exec(insertSQL, item.ID, item.Name, valueStr, item.Unit)
+		_, err := s.db.Exec(insertSQL, batchID, item.ID, item.Name, valueStr, item.Unit)
 		if err != nil {
-			log.Printf("Error inserting data into DB: %v", err)
-			http.Error(w, "Could not save data", http.StatusInternalServerError)
-			return
+			log.Printf("Error inserting data: %v", err)
+			continue // エラーでも他の項目の処理は続ける
 		}
-	}
-	log.Println("Successfully saved test results to DB.")
 
-	// モックデータ
-	mockResults := []PredictionResult{
-		{
-			ID:         "ldl",
-			Name:       "LDL Cholesterol",
-			Prediction: "肝機能への注意が必要です",
-			Advice:     "食生活の見直しや適度な運動を心がけましょう。詳細は医師にご相談ください。",
-		},
-		{
-			ID:         "glucose",
-			Name:       "Glucose",
-			Prediction: "血糖値は正常範囲です",
-			Advice:     "現在の健康的な生活習慣を維持しましょう。",
-		},
-	}
-	response := PredictResponse{
-		Results: mockResults,
+		// --- 簡易自動判定ロジック ---
+		prediction := "判定なし"
+		advice := "医師の診断を受けてください。"
+
+		// 数値に変換して判定
+		valFloat, err := strconv.ParseFloat(valueStr, 64)
+		if err == nil {
+			// 検査項目ごとのロジック (※あくまで例です)
+			switch item.ID {
+			case "ldl":
+				if valFloat >= 140 {
+					prediction = "高値 (High)"
+					advice = "基準値を超えています。脂質制限を心がけましょう。"
+				} else {
+					prediction = "正常 (Normal)"
+					advice = "正常範囲内です。"
+				}
+			case "glucose":
+				if valFloat >= 110 { // 空腹時血糖の簡易基準
+					prediction = "高値傾向"
+					advice = "糖質の摂りすぎに注意しましょう。"
+				} else {
+					prediction = "正常"
+					advice = "引き続き良い生活習慣を維持してください。"
+				}
+			default:
+				prediction = "記録済み"
+				advice = "データは保存されました。"
+			}
+		}
+
+		results = append(results, PredictionResult{
+			ID:         item.ID,
+			Name:       item.Name,
+			Prediction: prediction,
+			Advice:     advice,
+		})
 	}
 
+	response := PredictResponse{Results: results}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
 
-// Handles GET requests to /api/results (データ取得)
-func getResultsHandler(w http.ResponseWriter, r *http.Request) {
+// GET: 保存された全データを返す
+func (s *Server) getResultsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
 	}
 
-	log.Println("Received request to get all test results")
+	// 新しい順に取得
+	selectSQL := `SELECT id, batch_id, test_id, test_name, test_value, test_unit, created_at FROM test_results ORDER BY created_at DESC`
 
-	selectSQL := `SELECT id, test_id, test_name, test_value, test_unit, created_at FROM test_results ORDER BY created_at DESC`
-
-	rows, err := db.Query(selectSQL)
+	rows, err := s.db.Query(selectSQL)
 	if err != nil {
 		log.Printf("Error querying DB: %v", err)
 		http.Error(w, "Could not query data", http.StatusInternalServerError)
@@ -225,7 +246,8 @@ func getResultsHandler(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var res StoredTestResult
-		err := rows.Scan(&res.ID, &res.TestID, &res.TestName, &res.TestValue, &res.TestUnit, &res.CreatedAt)
+		// Scanに batch_id を追加
+		err := rows.Scan(&res.ID, &res.BatchID, &res.TestID, &res.TestName, &res.TestValue, &res.TestUnit, &res.CreatedAt)
 		if err != nil {
 			log.Printf("Error scanning DB row: %v", err)
 			continue
@@ -233,23 +255,15 @@ func getResultsHandler(w http.ResponseWriter, r *http.Request) {
 		results = append(results, res)
 	}
 
-	if err = rows.Err(); err != nil {
-		log.Printf("Error after scanning rows: %v", err)
-		http.Error(w, "Error processing data", http.StatusInternalServerError)
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
 }
 
-// --- ユーティリティ関数 ---
-
-// Simple CORS middleware
+// CORS対応ミドルウェア
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000") // 開発用にNext.jsのURLを許可
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS") // GETも許可
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 		if r.Method == "OPTIONS" {
