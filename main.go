@@ -10,12 +10,10 @@ import (
 	"strconv"
 	"time"
 
-	_ "github.com/lib/pq" // PostgreSQLドライバ
+	_ "github.com/lib/pq" 
 )
 
-// --- 構造体定義 ---
 
-// Server : データベース接続を保持するための構造体（グローバル変数を回避）
 type Server struct {
 	db *sql.DB
 }
@@ -42,10 +40,9 @@ type PredictResponse struct {
 	Results []PredictionResult `json:"results"`
 }
 
-// DBから読み出すための構造体
 type StoredTestResult struct {
 	ID        int       `json:"id"`
-	BatchID   string    `json:"batch_id"` // 1回の検査をまとめるID
+	BatchID   string    `json:"batch_id"`
 	TestID    string    `json:"test_id"`
 	TestName  string    `json:"test_name"`
 	TestValue string    `json:"test_value"`
@@ -54,12 +51,11 @@ type StoredTestResult struct {
 }
 
 func main() {
-	// 1. DB接続処理
 	db, err := initDB()
 	if err != nil {
 		log.Fatalf("Error initializing database: %v", err)
 	}
-	defer db.Close() // main終了時に閉じる
+	defer db.Close()
 	log.Println("Database connection successful!")
 
 	// Server構造体を初期化（ここでDBを渡す）
@@ -81,15 +77,22 @@ func main() {
 		log.Fatal(err)
 	}
 }
+	func  getenvOrDefault(key, fallback string) string {
+		value := os.Getenv(key)
+	if value == "" {
+            return fallback
+      }
+      return value
+	}
 
-// initDB はデータベース接続を初期化し、接続を返します
 func initDB() (*sql.DB, error) {
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
-	sslmode := os.Getenv("DB_SSLMODE")
+
+	host := getenvOrDefault("DB_HOST", "localhost")
+	port := getenvOrDefault("DB_PORT", "5432")
+	user := getenvOrDefault("DB_USER", "myuser")
+	password := getenvOrDefault("DB_PASSWORD", "mypassword")
+	dbname := getenvOrDefault("DB_NAME", "mydatabase")
+	sslmode := getenvOrDefault("DB_SSLMODE", "disable")
 
 	psqlInfo := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		user, password, host, port, dbname, sslmode)
@@ -99,7 +102,6 @@ func initDB() (*sql.DB, error) {
 		return nil, err
 	}
 
-	// リトライロジック
 	maxRetries := 5
 	for i := 0; i < maxRetries; i++ {
 		err = db.Ping()
@@ -114,7 +116,6 @@ func initDB() (*sql.DB, error) {
 		return nil, err
 	}
 
-	// テーブル作成
 	err = createTables(db)
 	if err != nil {
 		return nil, err
@@ -123,9 +124,7 @@ func initDB() (*sql.DB, error) {
 	return db, nil
 }
 
-// createTables テーブル作成（引数でdbを受け取る）
 func createTables(db *sql.DB) error {
-	// batch_id を追加して、一度の検査リクエストをグループ化できるようにしました
 	createTableSQL := `
     CREATE TABLE IF NOT EXISTS test_results (
         id SERIAL PRIMARY KEY,
@@ -145,9 +144,7 @@ func createTables(db *sql.DB) error {
 	return nil
 }
 
-// --- ハンドラメソッド (Server構造体に紐付け) ---
 
-// POST: データを保存し、判定結果を返す
 func (s *Server) predictHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
