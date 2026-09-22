@@ -32,5 +32,5 @@ RUN npm install --omit=dev
 COPY --from=web-builder /app/.next ./.next
 COPY --from=web-builder /app/public ./public
 COPY --from=web-builder /app/next.config.mjs ./next.config.mjs
-EXPOSE 3000
+EXPOSE 3001
 CMD ["npm", "start"]

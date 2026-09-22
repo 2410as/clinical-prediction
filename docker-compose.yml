@@ -21,7 +21,7 @@ services:
       context: .
       target: web-runtime # Dockerfile の "AS web-runtime" ステージを使ってね
     ports:
-      - "3000:3000"
+      - "3001:3001"
     container_name: nextjs-web-service
     environment:
       - NEXT_PUBLIC_API_URL=http://api:8080
@@ -36,7 +36,7 @@ services:
       - POSTGRES_PASSWORD=mypassword
       - POSTGRES_DB=mydatabase
     ports:
-      - "5432:5432" # ホストPCからDBに接続するために開けておく
+      - "5433:5432" # ホストPCからDBに接続するために開けておく
     volumes:
       # ▼ 最後の "エラーでる" を削除
       - postgres_data:/var/lib/postgresql/data
